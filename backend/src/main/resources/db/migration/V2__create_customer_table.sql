@@ -1,24 +1,12 @@
--- Create customer table (inherits from person)
+-- Create customer table (inherits from person with JOINED strategy)
+-- Only contains customer-specific fields, person fields are in person table
 CREATE TABLE customer (
     id CHAR(36) NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    genre VARCHAR(20),
-    birth_date VARCHAR(10) NOT NULL,
-    identification VARCHAR(20) NOT NULL UNIQUE,
-    address VARCHAR(150) NOT NULL,
-    phone VARCHAR(15) NOT NULL,
-    password VARCHAR(64) NOT NULL,
-    status BIT(1) NOT NULL DEFAULT 1,
     customer_code VARCHAR(10) NOT NULL UNIQUE,
-    created_at DATETIME(6) NOT NULL,
-    updated_at DATETIME(6) NOT NULL,
-    deleted_at DATETIME(6),
-    created_by VARCHAR(100) NOT NULL,
-    updated_by VARCHAR(100),
-    deleted_by VARCHAR(100),
-    is_deleted BIT(1) NOT NULL DEFAULT 0,
+    password VARCHAR(255) NOT NULL,
+    status BIT(1) NOT NULL DEFAULT 1,
     PRIMARY KEY (id),
-    INDEX idx_customer_code (customer_code),
-    INDEX idx_customer_identification (identification)
+    FOREIGN KEY (id) REFERENCES person(id) ON DELETE CASCADE,
+    INDEX idx_customer_code (customer_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
