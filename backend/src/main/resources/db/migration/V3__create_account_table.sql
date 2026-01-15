@@ -6,6 +6,7 @@ CREATE TABLE account (
     initial_balance DECIMAL(19, 4) NOT NULL,
     daily_limit DECIMAL(19, 4) NOT NULL,
     customer_id CHAR(36) NOT NULL,
+    status BIT(1) NOT NULL DEFAULT 1,
     created_at DATETIME(6) NOT NULL,
     updated_at DATETIME(6) NOT NULL,
     deleted_at DATETIME(6),

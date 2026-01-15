@@ -8,7 +8,6 @@ public record CustomerUpdateRequest(
         String birthDate,
         String address,
         String phone,
-        String password,
         Boolean status
 ) {
 }

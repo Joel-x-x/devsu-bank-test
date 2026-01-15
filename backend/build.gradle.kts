@@ -43,6 +43,13 @@ dependencies {
     implementation("org.mapstruct:mapstruct:${property("mapstructVersion")}")
     annotationProcessor("org.mapstruct:mapstruct-processor:${property("mapstructVersion")}")
     
+    // Apache POI for Excel generation
+    implementation("org.apache.poi:poi:5.2.5")
+    implementation("org.apache.poi:poi-ooxml:5.2.5")
+    
+    // iText for PDF generation
+    implementation("com.itextpdf:itext7-core:7.2.5")
+    
     compileOnly("org.projectlombok:lombok")
     runtimeOnly("com.mysql:mysql-connector-j")
     annotationProcessor("org.projectlombok:lombok")

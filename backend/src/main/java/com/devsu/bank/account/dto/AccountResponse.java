@@ -1,6 +1,6 @@
 package com.devsu.bank.account.dto;
 
-import com.devsu.bank.account.entity.AccountTypeEnum;
+import com.devsu.bank.account.AccountTypeEnum;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

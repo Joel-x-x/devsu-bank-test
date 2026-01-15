@@ -96,11 +96,6 @@ public class CustomerServiceImpl implements CustomerService {
         // Update fields
         mapper.updateEntityFromDto(request, entity);
         
-        // Encrypt password if provided
-        if (request.password() != null && !request.password().isBlank()) {
-            entity.setPassword(passwordEncoder.encode(request.password()));
-        }
-        
         CustomerEntity updated = repository.save(entity);
         CustomerResponse response = mapper.toResponse(updated);
         
@@ -122,7 +117,7 @@ public class CustomerServiceImpl implements CustomerService {
         
         CustomerEntity entity = findEntityById(id);
         
-        entity.setDeletedAt(LocalDateTime.now());
+        entity.softDelete("SYSTEM");
         entity.setStatus(false);
         repository.save(entity);
         

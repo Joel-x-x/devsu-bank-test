@@ -11,6 +11,7 @@ import org.mapstruct.ReportingPolicy;
 public interface MovementMapper {
     
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "movementDate", ignore = true)
     @Mapping(target = "balance", ignore = true)
     @Mapping(target = "availableBalance", ignore = true)
     @Mapping(target = "account", ignore = true)

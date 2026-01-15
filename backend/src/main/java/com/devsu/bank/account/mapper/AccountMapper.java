@@ -16,6 +16,7 @@ public interface AccountMapper {
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "deletedBy", ignore = true)
     AccountEntity toEntity(AccountRequest request);
     
     @Mapping(source = "customer.id", target = "customerId")
@@ -32,5 +33,6 @@ public interface AccountMapper {
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "deletedBy", ignore = true)
     void updateEntityFromDto(AccountUpdateRequest request, @MappingTarget AccountEntity entity);
 }

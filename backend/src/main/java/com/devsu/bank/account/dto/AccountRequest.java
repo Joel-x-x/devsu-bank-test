@@ -1,16 +1,12 @@
 package com.devsu.bank.account.dto;
 
-import com.devsu.bank.account.entity.AccountTypeEnum;
-import jakarta.validation.constraints.NotBlank;
+import com.devsu.bank.account.AccountTypeEnum;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 public record AccountRequest(
-        @NotBlank(message = "Account number is required")
-        String accountNumber,
-        
         @NotNull(message = "Account type is required")
         AccountTypeEnum accountType,
         
