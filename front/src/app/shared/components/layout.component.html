@@ -1,0 +1,26 @@
+<div class="layout">
+  <aside class="sidebar">
+    <div class="logo">
+      <h2>Devsu Bank</h2>
+    </div>
+
+    <nav class="nav">
+      <a routerLink="/customers" routerLinkActive="active" class="nav-item">
+        <span>Clientes</span>
+      </a>
+      <a routerLink="/accounts" routerLinkActive="active" class="nav-item">
+        <span>Cuentas</span>
+      </a>
+      <a routerLink="/movements" routerLinkActive="active" class="nav-item">
+        <span>Movimientos</span>
+      </a>
+      <a routerLink="/reports" routerLinkActive="active" class="nav-item">
+        <span>Reportes</span>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <router-outlet />
+  </main>
+</div>

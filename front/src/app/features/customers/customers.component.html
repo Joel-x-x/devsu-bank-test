@@ -1,0 +1,104 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Clientes</h1>
+  </div>
+
+  <div class="page-content">
+    <app-table
+      [columns]="columns"
+      [data]="customersData()"
+      (create)="openCreateModal()"
+      (edit)="openEditModal($event)"
+      (delete)="deleteCustomer($event)"
+      (search)="onSearch($event)"
+      (pageChange)="onPageChange($event)"
+    />
+  </div>
+
+  <app-modal
+    [title]="modalTitle()"
+    [isOpen]="isModalOpen()"
+    (close)="closeModal()"
+  >
+    <form [formGroup]="customerForm" (ngSubmit)="saveCustomer()">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input type="text" formControlName="name" class="form-control" />
+        @if (customerForm.get('name')?.invalid && customerForm.get('name')?.touched) {
+          <span class="error">Campo requerido</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Género *</label>
+        <select formControlName="genre" class="form-control">
+          <option value="">Seleccione...</option>
+          <option value="M">Masculino</option>
+          <option value="F">Femenino</option>
+          <option value="O">Otro</option>
+        </select>
+        @if (customerForm.get('genre')?.invalid && customerForm.get('genre')?.touched) {
+          <span class="error">Campo requerido</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Fecha de Nacimiento *</label>
+        <input type="date" formControlName="birthDate" class="form-control" />
+        @if (customerForm.get('birthDate')?.invalid && customerForm.get('birthDate')?.touched) {
+          <span class="error">Campo requerido</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Identificación *</label>
+        <input type="text" formControlName="identification" class="form-control" />
+        @if (customerForm.get('identification')?.invalid && customerForm.get('identification')?.touched) {
+          <span class="error">Campo requerido</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Dirección *</label>
+        <input type="text" formControlName="address" class="form-control" />
+        @if (customerForm.get('address')?.invalid && customerForm.get('address')?.touched) {
+          <span class="error">Campo requerido</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Teléfono *</label>
+        <input type="text" formControlName="phone" class="form-control" />
+        @if (customerForm.get('phone')?.invalid && customerForm.get('phone')?.touched) {
+          <span class="error">Campo requerido</span>
+        }
+      </div>
+
+      @if (!isEditMode()) {
+        <div class="form-group">
+          <label>Contraseña *</label>
+          <input type="password" formControlName="password" class="form-control" />
+          @if (customerForm.get('password')?.invalid && customerForm.get('password')?.touched) {
+            <span class="error">Mínimo 4 caracteres</span>
+          }
+        </div>
+      }
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="status" />
+          Activo
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="closeModal()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="customerForm.invalid || isLoading()">
+          {{ isLoading() ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  </app-modal>
+</div>

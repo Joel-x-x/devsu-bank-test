@@ -1,0 +1,77 @@
+<div class="table-container">
+  <div class="table-header">
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Buscar..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearch()"
+        class="search-input"
+      />
+    </div>
+    <button class="btn-primary" (click)="onCreate()">
+      + Nuevo
+    </button>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="table">
+      <thead>
+        <tr>
+          @for (column of columns(); track column.key) {
+            <th>{{ column.label }}</th>
+          }
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (data()?.content?.length) {
+          @for (row of data()!.content; track $index) {
+            <tr>
+              @for (column of columns(); track column.key) {
+                <td>{{ getColumnValue(row, column.key, column.type) }}</td>
+              }
+              <td class="actions">
+                <button class="btn-icon" (click)="onEdit(row)" title="Editar">✎</button>
+                <button class="btn-icon btn-danger" (click)="onDelete(row)" title="Eliminar">🗑</button>
+              </td>
+            </tr>
+          }
+        } @else {
+          <tr>
+            <td [attr.colspan]="columns().length + 1" class="no-data">
+              No hay datos disponibles
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (data()) {
+    <div class="pagination">
+      <div class="pagination-info">
+        Mostrando {{ (data()!.page * data()!.size) + 1 }} -
+        {{ Math.min((data()!.page + 1) * data()!.size, data()!.totalElements) }}
+        de {{ data()!.totalElements }} registros
+      </div>
+      <div class="pagination-controls">
+        <button
+          class="btn-page"
+          [disabled]="data()!.first"
+          (click)="onPageChange(data()!.page - 1)"
+        >
+          ←
+        </button>
+        <span class="page-info">Página {{ data()!.page + 1 }} de {{ data()!.totalPages }}</span>
+        <button
+          class="btn-page"
+          [disabled]="data()!.last"
+          (click)="onPageChange(data()!.page + 1)"
+        >
+          →
+        </button>
+      </div>
+    </div>
+  }
+</div>
