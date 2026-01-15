@@ -20,6 +20,25 @@ services:
       timeout: 5s
       retries: 5
 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bank-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bankdb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_PROFILES_ACTIVE: default
+    ports:
+      - "8080:8080"
+    networks:
+      - bank-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   mysql_data:
     driver: local
