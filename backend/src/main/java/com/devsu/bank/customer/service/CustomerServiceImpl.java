@@ -6,11 +6,18 @@ import com.devsu.bank.customer.dto.CustomerUpdateRequest;
 import com.devsu.bank.customer.entity.CustomerEntity;
 import com.devsu.bank.customer.mapper.CustomerMapper;
 import com.devsu.bank.customer.repository.CustomerRepository;
+import com.devsu.bank.customer.repository.CustomerSpecification;
 import com.devsu.bank.infrastructure.exception.EntityAlreadyExistsException;
 import com.devsu.bank.infrastructure.exception.EntityNotFoundException;
+import com.devsu.bank.infrastructure.pagination.FilterRequest;
+import com.devsu.bank.infrastructure.pagination.PageResponse;
 import com.devsu.bank.infrastructure.response.ResultResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -224,6 +231,43 @@ public class CustomerServiceImpl implements CustomerService {
         
         log.info("Customer deactivated successfully: {}", id);
         return ResultResponse.updated(response);
+    }
+    
+    // ========== PAGINATION ==========
+    
+    @Override
+    @Transactional(readOnly = true)
+    public ResultResponse<PageResponse<CustomerResponse>, String> findAllPaginated(FilterRequest filterRequest) {
+        log.debug("Finding customers with pagination - page: {}, size: {}, search: {}", 
+                filterRequest.getPage(), filterRequest.getSize(), filterRequest.getSearchValue());
+        
+        // Create sort
+        Sort sort = filterRequest.getSortDirection().equalsIgnoreCase("DESC")
+                ? Sort.by(filterRequest.getSortBy()).descending()
+                : Sort.by(filterRequest.getSortBy()).ascending();
+        
+        // Create pageable
+        Pageable pageable = PageRequest.of(filterRequest.getPage(), filterRequest.getSize(), sort);
+        
+        // Execute query with specification
+        Page<CustomerEntity> page = repository.findAll(
+                CustomerSpecification.withFilters(filterRequest.getSearchValue()),
+                pageable
+        );
+        
+        // Map to response
+        List<CustomerResponse> content = page.getContent().stream()
+                .map(mapper::toResponse)
+                .toList();
+        
+        PageResponse<CustomerResponse> pageResponse = PageResponse.of(
+                content,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements()
+        );
+        
+        return ResultResponse.success(pageResponse);
     }
     
     // ========== PRIVATE HELPER METHODS ==========

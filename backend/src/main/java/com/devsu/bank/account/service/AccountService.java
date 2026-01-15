@@ -3,6 +3,8 @@ package com.devsu.bank.account.service;
 import com.devsu.bank.account.dto.AccountRequest;
 import com.devsu.bank.account.dto.AccountResponse;
 import com.devsu.bank.account.dto.AccountUpdateRequest;
+import com.devsu.bank.infrastructure.pagination.FilterRequest;
+import com.devsu.bank.infrastructure.pagination.PageResponse;
 import com.devsu.bank.infrastructure.response.ResultResponse;
 import com.devsu.bank.infrastructure.service.CrudService;
 
@@ -15,6 +17,14 @@ import java.util.UUID;
  * All methods return ResultResponse for consistent API responses.
  */
 public interface AccountService extends CrudService<AccountRequest, AccountResponse, AccountUpdateRequest> {
+    
+    /**
+     * Finds accounts with pagination and optional filtering.
+     * 
+     * @param filterRequest Filter and pagination parameters
+     * @return ResultResponse containing paginated account data
+     */
+    ResultResponse<PageResponse<AccountResponse>, String> findAllPaginated(FilterRequest filterRequest);
     
     /**
      * Finds an account by its account number.

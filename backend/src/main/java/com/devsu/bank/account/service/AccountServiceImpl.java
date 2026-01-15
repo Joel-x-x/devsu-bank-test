@@ -11,14 +11,21 @@ import com.devsu.bank.account.dto.AccountUpdateRequest;
 import com.devsu.bank.account.entity.AccountEntity;
 import com.devsu.bank.account.mapper.AccountMapper;
 import com.devsu.bank.account.repository.AccountRepository;
+import com.devsu.bank.account.specification.AccountSpecification;
 import com.devsu.bank.customer.entity.CustomerEntity;
 import com.devsu.bank.customer.repository.CustomerRepository;
 import com.devsu.bank.infrastructure.exception.EntityAlreadyExistsException;
 import com.devsu.bank.infrastructure.exception.EntityNotFoundException;
 import com.devsu.bank.infrastructure.exception.InvalidOperationException;
+import com.devsu.bank.infrastructure.pagination.FilterRequest;
+import com.devsu.bank.infrastructure.pagination.PageResponse;
 import com.devsu.bank.infrastructure.response.ResultResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -303,5 +310,46 @@ public class AccountServiceImpl implements AccountService {
         return repository.findById(id)
             .filter(account -> account.getDeletedAt() == null)
             .orElseThrow(() -> new EntityNotFoundException("Account", id));
+    }
+
+    // ========== PAGINATION ==========
+    
+    @Override
+    @Transactional(readOnly = true)
+    public ResultResponse<PageResponse<AccountResponse>, String> findAllPaginated(FilterRequest filterRequest) {
+        log.debug("Finding paginated accounts with filters: {}", filterRequest);
+        
+        // Create sort
+        Sort sort = filterRequest.getSortDirection().equalsIgnoreCase("DESC")
+                ? Sort.by(filterRequest.getSortBy()).descending()
+                : Sort.by(filterRequest.getSortBy()).ascending();
+
+        // Create pageable
+        Pageable pageable = PageRequest.of(
+                filterRequest.getPage(),
+                filterRequest.getSize(),
+                sort
+        );
+
+        // Execute query with specification
+        Page<AccountEntity> page = repository.findAll(
+                AccountSpecification.withFilters(filterRequest.getSearchValue()),
+                pageable
+        );
+
+        // Map to response DTOs
+        List<AccountResponse> content = page.getContent().stream()
+                .map(mapper::toResponse)
+                .toList();
+
+        // Build page response
+        PageResponse<AccountResponse> pageResponse = PageResponse.of(
+                content,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements()
+        );
+
+        return ResultResponse.success(pageResponse);
     }
 }

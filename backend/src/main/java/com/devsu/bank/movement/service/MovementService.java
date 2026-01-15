@@ -1,5 +1,7 @@
 package com.devsu.bank.movement.service;
 
+import com.devsu.bank.infrastructure.pagination.FilterRequest;
+import com.devsu.bank.infrastructure.pagination.PageResponse;
 import com.devsu.bank.infrastructure.response.ResultResponse;
 import com.devsu.bank.movement.dto.BalanceResponse;
 import com.devsu.bank.movement.dto.MovementRequest;
@@ -61,4 +63,12 @@ public interface MovementService {
      * @return ResultResponse containing used amount
      */
     ResultResponse<BalanceResponse, String> calculateDailyLimitUsed(UUID accountId);
+    
+    /**
+     * Finds movements with pagination and optional filtering.
+     * 
+     * @param filterRequest Filter and pagination parameters
+     * @return ResultResponse containing paginated movement data
+     */
+    ResultResponse<PageResponse<MovementResponse>, String> findAllPaginated(FilterRequest filterRequest);
 }

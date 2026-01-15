@@ -4,6 +4,8 @@ import com.devsu.bank.customer.dto.CustomerRequest;
 import com.devsu.bank.customer.dto.CustomerResponse;
 import com.devsu.bank.customer.dto.CustomerUpdateRequest;
 import com.devsu.bank.customer.service.CustomerService;
+import com.devsu.bank.infrastructure.pagination.FilterRequest;
+import com.devsu.bank.infrastructure.pagination.PageResponse;
 import com.devsu.bank.infrastructure.response.ResultResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -64,6 +66,32 @@ public class CustomerController {
     public ResponseEntity<ResultResponse<List<CustomerResponse>, String>> getAllCustomers() {
         log.debug("REST request to get all customers");
         ResultResponse<List<CustomerResponse>, String> response = customerService.findAll();
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * Retrieves customers with pagination and optional filtering.
+     * 
+     * @param page Page number (default: 0)
+     * @param size Page size (default: 10)
+     * @param sortBy Field to sort by (default: id)
+     * @param sortDirection Sort direction ASC/DESC (default: ASC)
+     * @param search Search value to filter by name, identification, or customer code
+     * @return ResponseEntity with paginated customer data
+     */
+    @GetMapping("/paginated")
+    public ResponseEntity<ResultResponse<PageResponse<CustomerResponse>, String>> getCustomersPaginated(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDirection,
+            @RequestParam(required = false) String search) {
+        
+        log.debug("REST request to get customers paginated - page: {}, size: {}, search: {}", page, size, search);
+        
+        FilterRequest filterRequest = new FilterRequest(page, size, sortBy, sortDirection, null, search);
+        ResultResponse<PageResponse<CustomerResponse>, String> response = customerService.findAllPaginated(filterRequest);
+        
         return ResponseEntity.ok(response);
     }
     

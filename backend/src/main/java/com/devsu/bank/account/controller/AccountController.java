@@ -4,6 +4,8 @@ import com.devsu.bank.account.dto.AccountRequest;
 import com.devsu.bank.account.dto.AccountResponse;
 import com.devsu.bank.account.dto.AccountUpdateRequest;
 import com.devsu.bank.account.service.AccountService;
+import com.devsu.bank.infrastructure.pagination.FilterRequest;
+import com.devsu.bank.infrastructure.pagination.PageResponse;
 import com.devsu.bank.infrastructure.response.ResultResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,31 @@ public class AccountController {
         log.info("REST request to create account for customer: {}", request.customerId());
         ResultResponse<AccountResponse, String> response = accountService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    
+    /**
+     * Retrieves paginated accounts with optional filtering.
+     * 
+     * @param page Page number (0-based)
+     * @param size Number of items per page
+     * @param sortBy Field to sort by
+     * @param sortDirection Sort direction (ASC or DESC)
+     * @param search Search value to filter by
+     * @return ResponseEntity with paginated account data
+     */
+    @GetMapping("/paginated")
+    public ResponseEntity<ResultResponse<PageResponse<AccountResponse>, String>> getPaginatedAccounts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDirection,
+            @RequestParam(required = false) String search) {
+        log.info("REST request to get paginated accounts: page={}, size={}, sortBy={}, sortDirection={}, search={}", 
+                page, size, sortBy, sortDirection, search);
+        
+        FilterRequest filterRequest = new FilterRequest(page, size, sortBy, sortDirection, null, search);
+        ResultResponse<PageResponse<AccountResponse>, String> response = accountService.findAllPaginated(filterRequest);
+        return ResponseEntity.ok(response);
     }
     
     /**

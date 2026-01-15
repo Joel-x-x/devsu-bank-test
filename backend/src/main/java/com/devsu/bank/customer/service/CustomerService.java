@@ -3,6 +3,8 @@ package com.devsu.bank.customer.service;
 import com.devsu.bank.customer.dto.CustomerRequest;
 import com.devsu.bank.customer.dto.CustomerResponse;
 import com.devsu.bank.customer.dto.CustomerUpdateRequest;
+import com.devsu.bank.infrastructure.pagination.FilterRequest;
+import com.devsu.bank.infrastructure.pagination.PageResponse;
 import com.devsu.bank.infrastructure.response.ResultResponse;
 import com.devsu.bank.infrastructure.service.CrudService;
 
@@ -15,6 +17,14 @@ import java.util.UUID;
  * All methods return ResultResponse for consistent API responses.
  */
 public interface CustomerService extends CrudService<CustomerRequest, CustomerResponse, CustomerUpdateRequest> {
+    
+    /**
+     * Finds customers with pagination and optional filtering.
+     * 
+     * @param filterRequest Filter and pagination parameters
+     * @return ResultResponse containing paginated customer data
+     */
+    ResultResponse<PageResponse<CustomerResponse>, String> findAllPaginated(FilterRequest filterRequest);
     
     /**
      * Finds a customer by their unique customer code.

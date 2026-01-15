@@ -1,5 +1,7 @@
 package com.devsu.bank.movement.controller;
 
+import com.devsu.bank.infrastructure.pagination.FilterRequest;
+import com.devsu.bank.infrastructure.pagination.PageResponse;
 import com.devsu.bank.infrastructure.response.ResultResponse;
 import com.devsu.bank.movement.dto.BalanceResponse;
 import com.devsu.bank.movement.dto.MovementRequest;
@@ -43,6 +45,31 @@ public class MovementController {
                 request.accountId(), request.movementType());
         ResultResponse<MovementResponse, String> response = movementService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    
+    /**
+     * Retrieves paginated movements with optional filtering.
+     * 
+     * @param page Page number (0-based)
+     * @param size Number of items per page
+     * @param sortBy Field to sort by
+     * @param sortDirection Sort direction (ASC or DESC)
+     * @param search Search value to filter by
+     * @return ResponseEntity with paginated movement data
+     */
+    @GetMapping("/paginated")
+    public ResponseEntity<ResultResponse<PageResponse<MovementResponse>, String>> getPaginatedMovements(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "movementDate") String sortBy,
+            @RequestParam(defaultValue = "DESC") String sortDirection,
+            @RequestParam(required = false) String search) {
+        log.info("REST request to get paginated movements: page={}, size={}, sortBy={}, sortDirection={}, search={}", 
+                page, size, sortBy, sortDirection, search);
+        
+        FilterRequest filterRequest = new FilterRequest(page, size, sortBy, sortDirection, null, search);
+        ResultResponse<PageResponse<MovementResponse>, String> response = movementService.findAllPaginated(filterRequest);
+        return ResponseEntity.ok(response);
     }
     
     /**

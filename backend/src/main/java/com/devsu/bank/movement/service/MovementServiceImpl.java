@@ -5,6 +5,8 @@ import com.devsu.bank.account.entity.AccountEntity;
 import com.devsu.bank.account.repository.AccountRepository;
 import com.devsu.bank.infrastructure.exception.EntityNotFoundException;
 import com.devsu.bank.infrastructure.exception.InvalidOperationException;
+import com.devsu.bank.infrastructure.pagination.FilterRequest;
+import com.devsu.bank.infrastructure.pagination.PageResponse;
 import com.devsu.bank.infrastructure.response.ResultResponse;
 import com.devsu.bank.movement.business.*;
 import com.devsu.bank.movement.dto.BalanceResponse;
@@ -14,8 +16,13 @@ import com.devsu.bank.movement.entity.MovementEntity;
 import com.devsu.bank.movement.entity.MovementTypeEnum;
 import com.devsu.bank.movement.mapper.MovementMapper;
 import com.devsu.bank.movement.repository.MovementRepository;
+import com.devsu.bank.movement.specification.MovementSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -216,5 +223,44 @@ public class MovementServiceImpl implements MovementService {
                 accountId, startOfDay, endOfDay);
         
         return used != null ? used : BigDecimal.ZERO;
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public ResultResponse<PageResponse<MovementResponse>, String> findAllPaginated(FilterRequest filterRequest) {
+        log.debug("Finding paginated movements with filters: {}", filterRequest);
+        
+        // Create sort
+        Sort sort = filterRequest.getSortDirection().equalsIgnoreCase("DESC")
+                ? Sort.by(filterRequest.getSortBy()).descending()
+                : Sort.by(filterRequest.getSortBy()).ascending();
+
+        // Create pageable
+        Pageable pageable = PageRequest.of(
+                filterRequest.getPage(),
+                filterRequest.getSize(),
+                sort
+        );
+
+        // Execute query with specification
+        Page<MovementEntity> page = movementRepository.findAll(
+                MovementSpecification.withFilters(filterRequest.getSearchValue()),
+                pageable
+        );
+
+        // Map to response DTOs
+        List<MovementResponse> content = page.getContent().stream()
+                .map(mapper::toResponse)
+                .toList();
+
+        // Build page response
+        PageResponse<MovementResponse> pageResponse = PageResponse.of(
+                content,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements()
+        );
+
+        return ResultResponse.success(pageResponse);
     }
 }

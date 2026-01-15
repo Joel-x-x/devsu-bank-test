@@ -3,6 +3,7 @@ package com.devsu.bank.movement.repository;
 import com.devsu.bank.movement.entity.MovementEntity;
 import com.devsu.bank.movement.entity.MovementTypeEnum;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface MovementRepository extends JpaRepository<MovementEntity, UUID> {
+public interface MovementRepository extends JpaRepository<MovementEntity, UUID>, JpaSpecificationExecutor<MovementEntity> {
     
     @Query("SELECT m FROM MovementEntity m WHERE m.account.id = :accountId ORDER BY m.movementDate DESC")
     List<MovementEntity> findByAccountIdOrderByMovementDateDesc(@Param("accountId") UUID accountId);
