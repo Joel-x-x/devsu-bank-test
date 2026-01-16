@@ -1,0 +1,95 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Cuentas</h1>
+  </div>
+
+  <div class="page-content">
+    <app-table
+      [columns]="columns"
+      [data]="accountsData()"
+      (create)="openCreateModal()"
+      (edit)="openEditModal($event)"
+      (delete)="deleteAccount($event)"
+      (search)="onSearch($event)"
+      (pageChange)="onPageChange($event)"
+    />
+  </div>
+
+  <app-modal
+    [title]="modalTitle()"
+    [isOpen]="isModalOpen()"
+    (close)="closeModal()"
+  >
+    <form [formGroup]="accountForm" (ngSubmit)="saveAccount()">
+      <div class="form-group">
+        <label>Cliente *</label>
+        <div class="selector-field">
+          <input
+            type="text"
+            [value]="selectedCustomer() ? selectedCustomer()!.name : ''"
+            placeholder="Seleccione un cliente..."
+            readonly
+            class="form-control"
+          />
+          <button type="button" class="btn-selector" (click)="openCustomerSelector()">
+            Buscar
+          </button>
+        </div>
+        @if (accountForm.get('customerId')?.invalid && accountForm.get('customerId')?.touched) {
+          <span class="error">Campo requerido</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Tipo de Cuenta *</label>
+        <select formControlName="accountType" class="form-control">
+          <option value="">Seleccione...</option>
+          <option value="SAVINGS">Ahorros</option>
+          <option value="CHECKING">Corriente</option>
+        </select>
+        @if (accountForm.get('accountType')?.invalid && accountForm.get('accountType')?.touched) {
+          <span class="error">Campo requerido</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Saldo Inicial *</label>
+        <input type="number" formControlName="initialBalance" class="form-control" step="0.01" />
+        @if (accountForm.get('initialBalance')?.invalid && accountForm.get('initialBalance')?.touched) {
+          <span class="error">Debe ser mayor o igual a 0</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Límite Diario *</label>
+        <input type="number" formControlName="dailyLimit" class="form-control" step="0.01" />
+        @if (accountForm.get('dailyLimit')?.invalid && accountForm.get('dailyLimit')?.touched) {
+          <span class="error">Debe ser mayor a 0</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="status" />
+          Activo
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="closeModal()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="accountForm.invalid || isLoading()">
+          {{ isLoading() ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  </app-modal>
+
+  @if (isCustomerSelectorOpen()) {
+    <app-customer-selector-modal
+      (close)="closeCustomerSelector()"
+      (select)="onCustomerSelected($event)"
+    />
+  }
+</div>

@@ -36,7 +36,15 @@ export class MovementService {
     if (startDate) params = params.set('startDate', startDate);
     if (endDate) params = params.set('endDate', endDate);
 
-    return this.http.get<ApiResponse<Movement[]>>(`${this.apiUrl}/account`, { params });
+    return this.http.get<ApiResponse<Movement[]>>(this.apiUrl, { params });
+  }
+
+  findByCustomerId(customerId: string, startDate?: string, endDate?: string): Observable<ApiResponse<Movement[]>> {
+    let params = new HttpParams().set('customerId', customerId);
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+
+    return this.http.get<ApiResponse<Movement[]>>(this.apiUrl, { params });
   }
 
   create(movement: MovementRequest): Observable<ApiResponse<Movement>> {

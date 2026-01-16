@@ -3,8 +3,13 @@ package com.devsu.bank.movement.service;
 import com.devsu.bank.account.business.result.ValidationResult;
 import com.devsu.bank.account.entity.AccountEntity;
 import com.devsu.bank.account.repository.AccountRepository;
+import com.devsu.bank.customer.repository.CustomerRepository;
 import com.devsu.bank.infrastructure.exception.EntityNotFoundException;
 import com.devsu.bank.infrastructure.exception.InvalidOperationException;
+import com.devsu.bank.infrastructure.exception.InsufficientFundsException;
+import com.devsu.bank.infrastructure.exception.InactiveAccountException;
+import com.devsu.bank.infrastructure.exception.InactiveCustomerException;
+import com.devsu.bank.infrastructure.exception.DailyLimitExceededException;
 import com.devsu.bank.infrastructure.pagination.FilterRequest;
 import com.devsu.bank.infrastructure.pagination.PageResponse;
 import com.devsu.bank.infrastructure.response.ResultResponse;
@@ -45,6 +50,7 @@ public class MovementServiceImpl implements MovementService {
     
     private final MovementRepository movementRepository;
     private final AccountRepository accountRepository;
+    private final CustomerRepository customerRepository;
     private final MovementMapper mapper;
     
     // Business Rules
@@ -68,7 +74,7 @@ public class MovementServiceImpl implements MovementService {
                 .forAccount(account)
                 .validate();
         if (!accountValidation.isValid()) {
-            throw new InvalidOperationException(accountValidation.message());
+            throw new InactiveAccountException(accountValidation.message());
         }
         
         // Business Rule 2: Customer must be active
@@ -76,7 +82,7 @@ public class MovementServiceImpl implements MovementService {
                 .forAccount(account)
                 .validate();
         if (!customerValidation.isValid()) {
-            throw new InvalidOperationException(customerValidation.message());
+            throw new InactiveCustomerException(customerValidation.message());
         }
         
         // Calculate current balance
@@ -87,7 +93,7 @@ public class MovementServiceImpl implements MovementService {
                 .forTransaction(account, request.amount(), currentBalance, request.movementType())
                 .validate();
         if (!fundsValidation.isValid()) {
-            throw new InvalidOperationException(fundsValidation.message());
+            throw new InsufficientFundsException(fundsValidation.message());
         }
         
         // Business Rule 4: Daily limit for debit
@@ -95,7 +101,7 @@ public class MovementServiceImpl implements MovementService {
                 .forTransaction(account, request.amount(), request.movementType())
                 .validate();
         if (!limitValidation.isValid()) {
-            throw new InvalidOperationException(limitValidation.message());
+            throw new DailyLimitExceededException(limitValidation.message());
         }
         
         // Calculate new balance
@@ -165,6 +171,62 @@ public class MovementServiceImpl implements MovementService {
         List<MovementResponse> responses = movements.stream()
                 .map(mapper::toResponse)
                 .toList();
+        
+        return ResultResponse.success(responses);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public ResultResponse<List<MovementResponse>, String> findByCustomerId(
+            UUID customerId,
+            LocalDate startDate,
+            LocalDate endDate) {
+        log.debug("Finding movements for customer: {}, from: {}, to: {}", 
+                customerId, startDate, endDate);
+        
+        // Validate customer exists
+        customerRepository.findById(customerId)
+                .orElseThrow(() -> new EntityNotFoundException("Customer", customerId));
+        
+        // Get all accounts for the customer (excluding deleted accounts)
+        List<AccountEntity> customerAccounts = accountRepository.findByCustomerId(customerId).stream()
+                .filter(account -> account.getDeletedAt() == null)
+                .toList();
+        
+        if (customerAccounts.isEmpty()) {
+            log.debug("Customer {} has no accounts", customerId);
+            return ResultResponse.success(List.of());
+        }
+        
+        // Get movements for all accounts
+        List<MovementEntity> allMovements;
+        
+        if (startDate != null && endDate != null) {
+            LocalDateTime start = startDate.atStartOfDay();
+            LocalDateTime end = endDate.atTime(LocalTime.MAX);
+            
+            allMovements = customerAccounts.stream()
+                    .flatMap(account -> movementRepository
+                            .findByAccountIdAndMovementDateBetweenOrderByMovementDateDesc(
+                                    account.getId(), start, end)
+                            .stream())
+                    .sorted((m1, m2) -> m2.getMovementDate().compareTo(m1.getMovementDate()))
+                    .toList();
+        } else {
+            allMovements = customerAccounts.stream()
+                    .flatMap(account -> movementRepository
+                            .findByAccountIdOrderByMovementDateDesc(account.getId())
+                            .stream())
+                    .sorted((m1, m2) -> m2.getMovementDate().compareTo(m1.getMovementDate()))
+                    .toList();
+        }
+        
+        List<MovementResponse> responses = allMovements.stream()
+                .map(mapper::toResponse)
+                .toList();
+        
+        log.debug("Found {} movements for customer {} across {} accounts", 
+                responses.size(), customerId, customerAccounts.size());
         
         return ResultResponse.success(responses);
     }

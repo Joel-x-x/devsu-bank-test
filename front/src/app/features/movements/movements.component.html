@@ -1,0 +1,79 @@
+<div class="page">
+  <div class="page-header">
+    <h1>Movimientos</h1>
+  </div>
+
+  <div class="page-content">
+    <app-table
+      [columns]="columns"
+      [data]="movementsData()"
+      [showActions]="false"
+      (create)="openCreateModal()"
+      (search)="onSearch($event)"
+      (pageChange)="onPageChange($event)"
+    />
+  </div>
+
+  <app-modal
+    [title]="modalTitle()"
+    [isOpen]="isModalOpen()"
+    (close)="closeModal()"
+  >
+    <form [formGroup]="movementForm" (ngSubmit)="saveMovement()">
+      <div class="form-group">
+        <label>Cuenta *</label>
+        <div class="selector-field">
+          <input
+            type="text"
+            [value]="selectedAccount() ? selectedAccount()!.accountNumber + ' - ' + selectedAccount()!.customerName : ''"
+            placeholder="Seleccione una cuenta..."
+            readonly
+            class="form-control"
+          />
+          <button type="button" class="btn-selector" (click)="openAccountSelector()">
+            Buscar
+          </button>
+        </div>
+        @if (movementForm.get('accountId')?.invalid && movementForm.get('accountId')?.touched) {
+          <span class="error">Campo requerido</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Tipo de Movimiento *</label>
+        <select formControlName="movementType" class="form-control">
+          <option value="">Seleccione...</option>
+          <option value="CREDIT">Crédito (Depósito)</option>
+          <option value="DEBIT">Débito (Retiro)</option>
+        </select>
+        @if (movementForm.get('movementType')?.invalid && movementForm.get('movementType')?.touched) {
+          <span class="error">Campo requerido</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Monto *</label>
+        <input type="number" formControlName="amount" class="form-control" step="0.01" />
+        @if (movementForm.get('amount')?.invalid && movementForm.get('amount')?.touched) {
+          <span class="error">Debe ser mayor a 0</span>
+        }
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="closeModal()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="movementForm.invalid || isLoading()">
+          {{ isLoading() ? 'Guardando...' : 'Guardar' }}
+        </button>
+      </div>
+    </form>
+  </app-modal>
+
+  @if (isAccountSelectorOpen()) {
+    <app-account-selector-modal
+      (close)="closeAccountSelector()"
+      (select)="onAccountSelected($event)"
+    />
+  }
+</div>

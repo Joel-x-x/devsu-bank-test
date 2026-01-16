@@ -67,6 +67,19 @@ hibernate {
     }
 }
 
+// Auto clean before bootRun to avoid Hibernate enhancement issues
+tasks.named("bootRun") {
+    dependsOn("clean")
+}
+
+tasks.named("processAot") {
+    dependsOn("clean")
+}
+
+tasks.named("build") {
+    mustRunAfter("clean")
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }

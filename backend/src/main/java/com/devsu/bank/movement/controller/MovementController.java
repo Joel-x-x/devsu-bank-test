@@ -87,23 +87,23 @@ public class MovementController {
     }
     
     /**
-     * Retrieves all movements for a specific account.
+     * Retrieves all movements for all accounts of a specific customer.
      * Optionally filter by date range.
      * 
-     * @param accountId The account ID (required)
+     * @param customerId The customer ID (required)
      * @param startDate Optional start date for filtering
      * @param endDate Optional end date for filtering
-     * @return ResponseEntity with list of movements
+     * @return ResponseEntity with list of movements from all customer accounts
      */
     @GetMapping
-    public ResponseEntity<ResultResponse<List<MovementResponse>, String>> getMovementsByAccount(
-            @RequestParam UUID accountId,
+    public ResponseEntity<ResultResponse<List<MovementResponse>, String>> getMovementsByCustomer(
+            @RequestParam UUID customerId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        log.debug("REST request to get movements for account: {}, from: {}, to: {}", 
-                accountId, startDate, endDate);
+        log.debug("REST request to get movements for customer: {}, from: {}, to: {}", 
+                customerId, startDate, endDate);
         ResultResponse<List<MovementResponse>, String> response = 
-                movementService.findByAccountId(accountId, startDate, endDate);
+                movementService.findByCustomerId(customerId, startDate, endDate);
         return ResponseEntity.ok(response);
     }
     

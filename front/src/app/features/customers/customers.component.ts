@@ -5,6 +5,7 @@ import { Customer, CustomerRequest } from '@core/models/customer.model';
 import { PageResponse } from '@core/models/api-response.model';
 import { TableComponent, TableColumn } from '@shared/components/table.component';
 import { ModalComponent } from '@shared/components/modal.component';
+import { NotificationService } from '@core/services/notification.service';
 
 @Component({
   selector: 'app-customers',
@@ -16,6 +17,7 @@ import { ModalComponent } from '@shared/components/modal.component';
 export class CustomersComponent implements OnInit {
   private customerService = inject(CustomerService);
   private fb = inject(FormBuilder);
+  private notificationService = inject(NotificationService);
 
   customersData = signal<PageResponse<Customer> | null>(null);
   isModalOpen = signal(false);
@@ -62,7 +64,11 @@ export class CustomersComponent implements OnInit {
         next: (response: any) => {
           this.customersData.set(response.result);
         },
-        error: (err: any) => console.error('Error loading customers:', err)
+        error: (err: any) => {
+          console.error('Error loading customers:', err);
+          const errorMsg = this.notificationService.translateError(err.error) || 'Error al cargar clientes';
+          this.notificationService.error(errorMsg);
+        }
       });
   }
 
@@ -105,9 +111,12 @@ export class CustomersComponent implements OnInit {
           this.isLoading.set(false);
           this.closeModal();
           this.loadCustomers();
+          this.notificationService.success('Cliente actualizado correctamente');
         },
         error: (err: any) => {
           console.error('Error updating customer:', err);
+          const errorMsg = this.notificationService.translateError(err.error) || 'Error al actualizar cliente';
+          this.notificationService.error(errorMsg);
           this.isLoading.set(false);
         }
       });
@@ -117,9 +126,12 @@ export class CustomersComponent implements OnInit {
           this.isLoading.set(false);
           this.closeModal();
           this.loadCustomers();
+          this.notificationService.success('Cliente creado correctamente');
         },
         error: (err: any) => {
           console.error('Error creating customer:', err);
+          const errorMsg = this.notificationService.translateError(err.error) || 'Error al crear cliente';
+          this.notificationService.error(errorMsg);
           this.isLoading.set(false);
         }
       });
@@ -127,11 +139,18 @@ export class CustomersComponent implements OnInit {
   }
 
   deleteCustomer(customer: Customer) {
-    if (!confirm(`¿Está seguro de eliminar al cliente ${customer.name}?`)) return;
+    if (!confirm(`¿Está seguro de eliminar el cliente ${customer.name}?`)) return;
 
     this.customerService.delete(customer.id).subscribe({
-      next: () => this.loadCustomers(),
-      error: (err: any) => console.error('Error deleting customer:', err)
+      next: () => {
+        this.loadCustomers();
+        this.notificationService.success('Cliente eliminado correctamente');
+      },
+      error: (err: any) => {
+        console.error('Error deleting customer:', err);
+        const errorMsg = this.notificationService.translateError(err.error) || 'Error al eliminar cliente';
+        this.notificationService.error(errorMsg);
+      }
     });
   }
 

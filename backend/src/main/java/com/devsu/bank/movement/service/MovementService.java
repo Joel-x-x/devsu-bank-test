@@ -49,6 +49,21 @@ public interface MovementService {
     );
     
     /**
+     * Finds all movements for all accounts of a specific customer.
+     * Optionally filter by date range.
+     * 
+     * @param customerId Customer ID (required)
+     * @param startDate Optional start date for filtering
+     * @param endDate Optional end date for filtering
+     * @return ResultResponse containing list of movements from all customer accounts
+     */
+    ResultResponse<List<MovementResponse>, String> findByCustomerId(
+            UUID customerId,
+            LocalDate startDate,
+            LocalDate endDate
+    );
+    
+    /**
      * Calculates current balance and daily limit information for an account.
      * 
      * @param accountId Account ID

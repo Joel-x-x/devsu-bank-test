@@ -21,7 +21,9 @@
           @for (column of columns(); track column.key) {
             <th>{{ column.label }}</th>
           }
-          <th>Acciones</th>
+          @if (showActions()) {
+            <th>Acciones</th>
+          }
         </tr>
       </thead>
       <tbody>
@@ -31,13 +33,15 @@
               @for (column of columns(); track column.key) {
                 <td>{{ getColumnValue(row, column.key, column.type) }}</td>
               }
-              <td class="actions">
-                <button class="btn-icon" (click)="onEdit(row)" title="Editar">✎</button>
-                <button class="btn-icon btn-danger" (click)="onDelete(row)" title="Eliminar">🗑</button>
-              </td>
+              @if (showActions()) {
+                <td class="actions">
+                  <button class="btn-icon" (click)="onEdit(row)" title="Editar">✎</button>
+                  <button class="btn-icon btn-danger" (click)="onDelete(row)" title="Eliminar">🗑</button>
+                </td>
+              }
             </tr>
           }
-        } @else {
+        } @else {showActions() ? columns().length + 1 : columns().length
           <tr>
             <td [attr.colspan]="columns().length + 1" class="no-data">
               No hay datos disponibles

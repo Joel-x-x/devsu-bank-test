@@ -12,6 +12,7 @@ public record AccountResponse(
         AccountTypeEnum accountType,
         BigDecimal initialBalance,
         BigDecimal dailyLimit,
+        Boolean status,
         UUID customerId,
         String customerName,
         LocalDateTime createdAt,

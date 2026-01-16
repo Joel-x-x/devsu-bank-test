@@ -55,3 +55,57 @@
   background: #fafafa;
   overflow: auto;
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  .logo {
+    padding: 16px;
+  }
+
+  .logo h2 {
+    font-size: 16px;
+  }
+
+  .nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 8px;
+  }
+
+  .nav-item {
+    white-space: nowrap;
+    padding: 10px 16px;
+    border-left: none;
+    border-bottom: 3px solid transparent;
+  }
+
+  .nav-item.active {
+    border-left: none;
+    border-bottom-color: #333;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    padding: 12px;
+  }
+
+  .logo h2 {
+    font-size: 15px;
+  }
+
+  .nav-item {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}

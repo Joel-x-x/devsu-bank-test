@@ -1,0 +1,132 @@
+<div class="reports-container">
+  <div class="header">
+    <h1>Estado de Cuenta</h1>
+  </div>
+
+  <div class="filter-card">
+    <form [formGroup]="filterForm" (ngSubmit)="generateReport()">
+      <div class="form-group">
+        <label for="customerId">Cliente</label>
+        <select id="customerId" formControlName="customerId">
+          <option value="">Seleccionar cliente</option>
+          @for (customer of customers(); track customer.id) {
+            <option [value]="customer.id">
+              {{ customer.name }} - {{ customer.identification }}
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="startDate">Fecha Inicio</label>
+          <input type="date" id="startDate" formControlName="startDate">
+        </div>
+
+        <div class="form-group">
+          <label for="endDate">Fecha Fin</label>
+          <input type="date" id="endDate" formControlName="endDate">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="filterForm.invalid || isLoading()">
+          {{ isLoading() ? 'Generando...' : 'Generar Reporte' }}
+        </button>
+        @if (movements().length > 0) {
+          <button type="button" (click)="clearReport()">Limpiar</button>
+        }
+      </div>
+    </form>
+  </div>
+
+  @if (movements().length > 0 && selectedCustomer()) {
+    <div class="report-card">
+      <div class="report-header">
+        <h2>Reporte de Movimientos</h2>
+        <button class="export-btn" (click)="exportToCSV()">Exportar PDF</button>
+      </div>
+
+      <div class="account-info">
+        <div class="info-item">
+          <span class="label">Cliente:</span>
+          <span class="value">{{ selectedCustomer()?.name }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Identificación:</span>
+          <span class="value">{{ selectedCustomer()?.identification }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Cuentas:</span>
+          <span class="value">{{ accounts().length }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Período:</span>
+          <span class="value">
+            {{ filterForm.value.startDate | date:'dd/MM/yyyy' }} - {{ filterForm.value.endDate | date:'dd/MM/yyyy' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="summary">
+        <div class="summary-item">
+          <span class="label">Saldo Inicial:</span>
+          <span class="value">{{ getInitialBalance() | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-item credit">
+          <span class="label">Total Créditos:</span>
+          <span class="value">+{{ getTotalCredits() | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-item debit">
+          <span class="label">Total Débitos:</span>
+          <span class="value">-{{ getTotalDebits() | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-item final">
+          <span class="label">Saldo Final:</span>
+          <span class="value">{{ getFinalBalance() | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <div class="movements-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Cuenta</th>
+              <th>Tipo Cuenta</th>
+              <th>Fecha</th>
+              <th>Tipo Mov.</th>
+              <th>Monto</th>
+              <th>Saldo</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (movement of movements(); track movement.id) {
+              <tr>
+                <td>{{ movement.accountNumber || getAccountNumber(movement.accountId, movement) }}</td>
+                <td>{{ getAccountType(movement.accountId) }}</td>
+                <td>{{ movement.movementDate | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <span class="badge" [class.credit]="movement.movementType === 'CREDIT'"
+                        [class.debit]="movement.movementType === 'DEBIT'">
+                    {{ movement.movementType | movementType }}
+                  </span>
+                </td>
+                <td [class.credit-amount]="movement.movementType === 'CREDIT'"
+                    [class.debit-amount]="movement.movementType === 'DEBIT'">
+                  {{ movement.movementType === 'CREDIT' ? '+' : '-' }}{{ Math.abs(movement.amount) | number:'1.2-2' }}
+                </td>
+                <td>{{ movement.balance | number:'1.2-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  @if (movements().length === 0 && !isLoading() && filterForm.touched) {
+    <div class="no-data">
+      <p>No se encontraron movimientos para el período seleccionado</p>
+    </div>
+  }
+</div>

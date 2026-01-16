@@ -5,7 +5,7 @@ import { PageResponse } from '../../core/models/api-response.model';
 export interface TableColumn {
   key: string;
   label: string;
-  type?: 'text' | 'number' | 'boolean' | 'date';
+  type?: 'text' | 'number' | 'boolean' | 'date' | 'accountType' | 'movementType';
 }
 
 @Component({
@@ -18,6 +18,7 @@ export interface TableColumn {
 export class TableComponent<T> {
   columns = input.required<TableColumn[]>();
   data = input<PageResponse<T> | null>(null);
+  showActions = input<boolean>(true);
 
   create = output<void>();
   edit = output<T>();
@@ -27,6 +28,16 @@ export class TableComponent<T> {
 
   searchTerm = '';
   Math = Math;
+
+  private accountTypeTranslations: Record<string, string> = {
+    'SAVINGS': 'Ahorros',
+    'CHECKING': 'Corriente'
+  };
+
+  private movementTypeTranslations: Record<string, string> = {
+    'CREDIT': 'Crédito',
+    'DEBIT': 'Débito'
+  };
 
   onCreate() {
     this.create.emit();
@@ -63,6 +74,10 @@ export class TableComponent<T> {
         return new Date(value as string | number | Date).toLocaleDateString();
       case 'number':
         return typeof value === 'number' ? value.toLocaleString() : String(value);
+      case 'accountType':
+        return this.accountTypeTranslations[String(value)] || String(value);
+      case 'movementType':
+        return this.movementTypeTranslations[String(value)] || String(value);
       default:
         return String(value);
     }

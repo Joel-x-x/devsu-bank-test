@@ -42,7 +42,7 @@ public class MovementSpecification {
                 );
 
                 Predicate movementType = criteriaBuilder.like(
-                        criteriaBuilder.lower(criteriaBuilder.treat(root.get("movementType"), String.class)),
+                        criteriaBuilder.lower(root.get("movementType").as(String.class)),
                         likePattern
                 );
 
